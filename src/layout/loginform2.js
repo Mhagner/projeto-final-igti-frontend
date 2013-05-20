@@ -87,9 +87,6 @@ class LoginForm2 extends Component {
         return (
             <div className="login-wrap">
                 <div className="login-html">
-                    <div className="group-logo">
-                        <h3>Logo</h3>
-                    </div>
                     <input
                         id="tab-1"
                         type="radio"

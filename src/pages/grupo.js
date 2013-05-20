@@ -1,17 +1,11 @@
 import React, { Component } from 'react'
 import { formatMoney } from '../funcoes/utils'
 import moment from 'moment'
-//import ptbr from 'antd/lib/locale-provider/pt_BR'
-
-import Card from '../componentes/card'
 import Table from '../componentes/table'
-import TableParticipantes from '../componentes/tableParticipantes'
 import Tamplate from '../layout/tamplate'
 import api from './../funcoes/api';
 import If from '../componentes/if'
 import { getUser } from '../funcoes/services'
-import { Link } from 'react-router-dom'
-import numeral from 'numeral'
 import {
     Form,
     Input,
@@ -28,7 +22,6 @@ import {
     Steps,
     Switch
 } from 'antd'
-import { Z_PARTIAL_FLUSH } from 'zlib';
 
 notification.config({
     bottom: 50,
@@ -37,7 +30,7 @@ notification.config({
 
 const ButtonGroup = Button.Group;
 const Step = Steps.Step;
-const { MonthPicker, RangePicker } = DatePicker;
+const { MonthPicker } = DatePicker;
 const { Option } = Select;
 const FormItem = Form.Item;
 
@@ -54,7 +47,6 @@ const steps = [{
 
 let uuid = 0;
 
-const dateFormat = 'DD/MM/YYYY';
 const mesFormat = 'MM/YYYY';
 
 class Grupo extends Component {
@@ -74,7 +66,6 @@ class Grupo extends Component {
             jurosAcumulativo: false,
             usuarioEmail: getUser(),
             participantes: [],
-            dados: [{}],
             loading: false,
             tableLoading: false,
             grupos: [],
@@ -112,8 +103,6 @@ class Grupo extends Component {
             valorMensal, jurosAcumulativo, jurosMensal, participantes, usuarioEmail } = this.state
 
         this.setState({ loading: true })
-
-        console.log(this.state.participantes)
 
         api.post(`/grupos`, {
             nome, descricao, diaPagamento, diaRecebimento, mesAnoInicio,
@@ -247,7 +236,6 @@ class Grupo extends Component {
         this.setState({
             [e.target.name]: e.target.value
         })
-        //console.log(this.state.nome)
     }
 
     handleDiaRecebimentoChange = value => {
@@ -312,7 +300,7 @@ class Grupo extends Component {
     calculaQuantidadeDeMeses = () => {
         var inicio = moment(this.state.mesAnoInicio)
         var fim = moment(this.state.mesAnoFim)
-        var qtdeMeses = (fim.diff(inicio, 'months') + 2)
+        var qtdeMeses = (fim.diff(inicio, 'months') + 1)
         return qtdeMeses
     }
 
