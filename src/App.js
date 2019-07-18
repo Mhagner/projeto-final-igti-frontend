@@ -1,24 +1,20 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
 
-function App() {
+import Card from './componentes/card'
+import { Row } from 'antd'
+import Tamplate from './layout/tamplate'
+
+//css do antd
+import 'antd/dist/antd.css'
+import './assets/css/custom.css'
+
+
+function App(props) {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Tamplate>
+        <h2>Dashboard</h2>
+      </Tamplate>
     </div>
   );
 }

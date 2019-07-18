@@ -1,0 +1,28 @@
+.login-form {
+    max-width: 300px;
+}   
+.login-form-forgot {
+    float: right;
+}
+.login-form-button {    
+    width: 100%;
+}
+.login-form-style {
+    width: 300px;
+    margin: 0px auto;
+    background-color: #CDBf;
+    padding: 50px;
+    position: relative;
+    top: 100px;
+    left: 0px;
+}
+
+.area-adm{
+    position: relative;
+}
+
+.label-button{
+    position:absolute;
+    left:19px;
+    margin-right:5px;
+}
