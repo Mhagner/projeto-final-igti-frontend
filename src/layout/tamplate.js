@@ -42,7 +42,7 @@ class Tamplate extends Component {
                 </Header>
                 <Content style={{ padding: '0 50px' }}>
                     <Breadcrumb style={{ margin: '16px 0' }} />
-                    <div style={{ background: '#fff', padding: 24, minHeight: 280 }}>
+                    <div style={{ background: '#fff', padding: 30, minHeight: 280 }}>
                         {this.props.children}
                     </div>
                 </Content>

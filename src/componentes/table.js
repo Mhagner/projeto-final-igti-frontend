@@ -1,5 +1,6 @@
 
 import React from 'react'
+import moment from 'moment'
 
 import { Table, Divider, Icon, Popconfirm } from 'antd';
 
@@ -11,16 +12,22 @@ export default (props) => {
             render: text => <a href="javascript:;">{text}</a>,
         },
         {
-            title: 'Descrição',
-            dataIndex: 'descricao',
+            title: 'Dia do pagamento',
+            dataIndex: 'diaPagamento',
+        },
+        {
+            title: 'Dia do recebimento',
+            dataIndex: 'diaRecebimento',
         },
         {
             title: 'Mês/Ano Início',
             dataIndex: 'mesAnoInicio',
+            render: date1 => <a href="javascript:;">{moment(date1).format("MM/YYYY")}</a>
         },
         {
             title: 'Mês/Ano Fim',
             dataIndex: 'mesAnoFim',
+            render: date2 => <a href="javascript:;">{moment(date2).format("MM/YYYY")}</a>
         },
         {
             title: 'Ação',
@@ -31,9 +38,17 @@ export default (props) => {
                             href="javascript:;"
                             onClick={(e) => props.handleEdit(grupo._id)}
                             >
-                            <Icon type="user-add" theme="twoTone" style={{ fontSize: '24px' }}
-                              />
-                               <Icon type="plus-circle" style={{ fontSize: '24px' }} theme="twoTone" twoToneColor="#52c41a" />
+                            <Icon 
+                                type="user-add" 
+                                theme="twoTone" 
+                                style={{ fontSize: '24px' }}
+                            />
+                               <Icon 
+                                    type="plus-circle" 
+                                    style={{ fontSize: '24px' }} 
+                                    theme="twoTone" 
+                                    twoToneColor="#52c41a" 
+                                />
                         </a>
                         <Divider type="vertical" />
                         <Popconfirm

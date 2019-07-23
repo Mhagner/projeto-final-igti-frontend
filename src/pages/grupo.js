@@ -1,18 +1,25 @@
 import React, { Component } from 'react'
-import { notification } from 'antd'
+import moment from 'moment'
 import Card from '../componentes/card'
 import Table from '../componentes/table'
 import Tamplate from '../layout/tamplate'
 import api from './../funcoes/api';
 import If from '../componentes/if'
-import moment from 'moment'
+import { Link } from 'react-router-dom'
 import {
     Form,
     Input,
     DatePicker,
     Select,
     Modal,
-    Button
+    Button,
+    notification,
+    Icon,
+    InputNumber,
+    Row,
+    Col,
+    Spin,
+    Steps
 } from 'antd'
 
 notification.config({
@@ -20,19 +27,29 @@ notification.config({
     duration: 2.0
 })
 
+const ButtonGroup = Button.Group;
+const Step = Steps.Step;
 const { MonthPicker, RangePicker } = DatePicker;
 const { Option } = Select;
+const FormItem = Form.Item;
+
+const steps = [{
+    title: 'Grupo',
+    content: 'Grupo-content',
+}, {
+    title: 'Valores',
+    content: 'Valores-content',
+},{
+    title: 'Participantes',
+    content: 'Participantes-content',
+}];
+
+let uuid = 0;
 
 const dateFormat = 'DD/MM/YYYY';
 const mesFormat = 'MM/YYYY';
 
-const diasData = []
-for (let i = 1; i < 20; i++) {
-    diasData.push(<Option key={i}>{i}</Option>);
-}
-
 class Grupo extends Component {
-
     constructor(props) {
         super(props)
 
@@ -44,20 +61,25 @@ class Grupo extends Component {
             diaPagamento: undefined,
             mesAnoInicio: undefined,
             mesAnoFim: undefined,
+            valorMensal: undefined,
+            jurosMensal: undefined,
             loading: false,
+            tableLoading: false,
             grupos: [],
-            visible: false
+            visible: false,
+            current: 0,
         }
 
         this.limpaCampos = this.limpaCampos.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
-
+        this.editarGrupo = this.editarGrupo.bind(this)
     }
 
     listarGrupos() {
+        this.setState({ tableLoading: true })
         api.get('/grupos')
             .then(response => this.setState({ grupos: response.data }))
-
+            .then(response => this.setState({ tableLoading: false }))
             .catch(error => {
                 console.log(error)
             })
@@ -66,11 +88,16 @@ class Grupo extends Component {
     handleSubmit = (e) => {
         e.preventDefault()
 
-        const { nome, descricao } = this.state
+        this.setState({ 
+            mesAnoInicio: moment(moment(this.state.mesAnoInicio).format("L"), "MMDDYYYY").format(),
+            mesAnoFim: moment(moment(this.state.mesAnoFim).format("L"), "MMDDYYYY").format()
+        })
+        
+        const { nome, descricao, diaPagamento, diaRecebimento, mesAnoInicio, mesAnoFim } = this.state
 
         this.setState({ loading: true })
 
-        api.post(`/grupos`, { nome, descricao })
+        api.post(`/grupos`, { nome, descricao, diaPagamento, diaRecebimento, mesAnoInicio, mesAnoFim })
             .then(response => [
                 this.setState({ loading: false }),
                 notification.success({
@@ -79,21 +106,23 @@ class Grupo extends Component {
                         response.data.message.toString()
                 }),
                 this.limpaCampos(),
-                this.setState({ visible: false }),
+                this.setState({ 
+                    visible: false
+                }),
                 this.listarGrupos()
             ])
-            .catch(error => [
+            .catch(e => [
                 this.setState({ loading: false }),
                 notification.error({
                     message: 'Ops!',
-                    description:
-                        error.response.data.message.toString()
-                }),
+                    description: e.response.data.message.toString()
+                })
             ])
+
     }
 
     deletarGrupo = (grupo) => {
-
+        this.setState({ tableLoading: true })
         api.delete(`/grupos/${grupo._id}`)
             .then(response => [
                 notification.success({
@@ -102,18 +131,19 @@ class Grupo extends Component {
                         response.data.message.toString()
                 })
             ])
+            .then(response => this.setState({ tableLoading: false }))
             .then(response => this.listarGrupos())
-            .catch(error => [
+            .catch(e => [
+                this.setState({ loading: false }),
                 notification.error({
                     message: 'Ops!',
-                    description:
-                        error.response.data.message.toString()
-                }),
+                    description: e.response.data.message.toString()
+                })
             ])
     }
 
     editarGrupo = (grupo) => {
-        api.put(`/grupos/${grupo._id}`, )
+        api.put(`/grupos/${grupo._id}`)
             .then(response => [
                 notification.success({
                     message: 'Sucesso!',
@@ -122,19 +152,27 @@ class Grupo extends Component {
                 })
             ])
             .then(response => this.listarGrupos())
-            .catch(error => [
+            .catch(e => [
+                this.setState({ loading: false }),
                 notification.error({
                     message: 'Ops!',
-                    description:
-                        error.response.data.message.toString()
-                }),
+                    description: e.response.data.message.toString()
+                })
             ])
+
     }
 
     limpaCampos() {
         this.setState({
             nome: '',
-            descricao: ''
+            descricao: '',
+            diaPagamento: '',
+            diaRecebimento: '',
+            current: 0,
+            mesAnoInicio: undefined,
+            mesAnoFim: undefined,
+            valorMensal: undefined,
+            jurosMensal: undefined
         })
     }
 
@@ -154,14 +192,20 @@ class Grupo extends Component {
         this.setState({
             ...this.state,
             nome: firtItem.nome,
-            descricao: firtItem.descricao
+            descricao: firtItem.descricao,
+            diaPagamento: firtItem.diaPagamento,
+            diaRecebimento: firtItem.diaRecebimento,
+            mesAnoInicio: firtItem.mesAnoInicio,
+            mesAnoFim: firtItem.mesAnoFim
         })
 
         this.showModal()
     }
 
     handleCancel = () => {
-        this.setState({ visible: false });
+        this.setState({ 
+            visible: false
+        });
         this.limpaCampos()
     };
 
@@ -169,21 +213,129 @@ class Grupo extends Component {
         this.setState({
             [e.target.name]: e.target.value
         })
+        console.log(this.state.valorMensal)
+        console.log(this.state.jurosMensal)
     }
+
+    handleDiaRecebimentoChange = value => {
+        this.setState({
+            diaRecebimento: value
+        });
+    };
+
+    handleDiaPagamentoChange = value => {
+        this.setState({
+            diaPagamento: value
+        });
+    };
+
+    handleDataInicioChange = (value) => {
+        this.setState({
+            mesAnoInicio: value
+        });
+    };
+
+    handleDataFimChange = (value) => {
+        this.setState({
+            mesAnoFim: value
+        });
+    };
 
     componentDidMount() {
         this.listarGrupos()
     }
 
+    next() {
+        const current = this.state.current + 1
+        this.setState({ current })
+    }
+
+    prev() {
+        const current = this.state.current - 1
+        this.setState({ current })
+    }
+
+    remove = (k) => {
+        const { form } = this.props;
+        // can use data-binding to get
+        const keys = form.getFieldValue('keys');
+        // We need at least one passenger
+        if (keys.length === 1) {
+            return;
+        }
+        // can use data-binding to set
+        form.setFieldsValue({
+            keys: keys.filter(key => key !== k),
+        });
+    }
+
+    add = () => {
+        uuid++;
+        const { form } = this.props;
+        // can use data-binding to get
+        const keys = form.getFieldValue('keys');
+        const nextKeys = keys.concat(uuid);
+        // can use data-binding to set
+        // important! notify form to detect changes
+        form.setFieldsValue({
+            keys: nextKeys,
+        });
+    }
+
     render() {
-        const { getFieldDecorator } = this.props.form;
+        const { getFieldDecorator, getFieldValue } = this.props.form;
         const { TextArea } = Input;
-        const { visible, loading, _id } = this.state;
-        const config = {
-            rules: [{ type: 'object', required: true, message: 'Please select time!' }],
-        };
-        const now = new Date
-        
+        const { visible, loading, current } = this.state;
+        getFieldDecorator('keys', { initialValue: [] });
+        const keys = getFieldValue('keys');
+
+        const formItems = keys.map((item, index) => {
+            return (
+                <Row gutter={16}>
+                    <Col span={10}>
+                        <FormItem
+                            required={false}
+                            key={item}
+                        >
+                        {getFieldDecorator(`${item}[${index}].nome`)(
+                            <Input 
+                                name={`${item}`}
+                                placeholder="Nome" 
+                                style={{ width: '100%', marginRight: 10 }} 
+                                onChange={this.handleChange}
+                            />
+                        )}
+                        </FormItem>
+                    </Col>
+                    <Col span={12}>
+                        <FormItem
+                            required={false}
+                            key={item}
+                        >
+                        {getFieldDecorator(`${item}[${index}].email`)(
+                            <Input 
+                                name={`${item}`}
+                                placeholder="E-mail" 
+                                style={{ width: '100%', marginRight: 10 }} 
+                            />
+                        )}
+                        
+                        </FormItem>
+                      
+                    </Col>
+                    <Col span={2}>
+                        <If test={keys.length > 1}>
+                            <Icon
+                                className="dynamic-delete-button"
+                                type="minus-circle-o"
+                                disabled={keys.length === 1}
+                                onClick={() => this.remove(item)}
+                            />
+                        </If>
+                    </Col>
+                </Row>
+            );
+        });
 
         return (
             <div>
@@ -191,13 +343,18 @@ class Grupo extends Component {
                     <Button
                         type="primary"
                         onClick={this.showModal}
-                        style={{ marginBottom: 16 }}>
+                        style={{ marginBottom: 20 }}>
+                        <Icon type="usergroup-add" style={{ fontSize: '18px' }} />
                         Novo Grupo
                     </Button>
+
                     <Modal
+                        className='modal'
+                        style={{ marginBottom: 24 }}
                         visible={visible}
                         title='Cadastrar novo Grupo'
                         onCancel={this.handleCancel}
+                        wrapClassName="vertical-center-modal"
                         footer={
                             [
                                 <Button
@@ -206,82 +363,172 @@ class Grupo extends Component {
                                     onClick={this.handleCancel}>
                                     Cancelar
                                 </Button>,
+                                <If test={(steps[this.state.current].content) === 'Participantes-content'} >
+                                    <Button
+                                        key="edit"
+                                        type="primary"
+                                        loading={loading}
+                                        onClick={this.handleSubmit}>
+                                        Salvar
+                                </Button>
+                                </If>
 
-                                <Button
-                                    key="submit"
-                                    type="primary"
-                                    loading={loading} onClick={this.handleSubmit}>
-                                    Salvar
-                                 </Button>
                             ]}
                     >
-                        <Form onSubmit={this.handleSubmit}>
-                            <Form.Item label="Data da criação">
-                                <DatePicker
-                                    name='dataCricao'
-                                    format={dateFormat}
-                                    onChange={this.dateChange}
-                                    value={this.state.dataCriacao}
-                                    disabled={true}
-                                />
-                            </Form.Item>
-                            <Form.Item label="Nome do grupo">
-                                <Input
-                                    name='nome'
-                                    onChange={this.handleChange.bind(this)}
-                                    value={this.state.nome}
-                                />
-                            </Form.Item>
-                            <Form.Item label="Descrição do grupo">
-                                <TextArea
-                                    placeholder="Informe uma descrição sobre esse grupo"
-                                    name='descricao'
-                                    onChange={this.handleChange.bind(this)}
-                                    autosize={{ minRows: 2, maxRows: 6 }}
-                                    required={true}
-                                    value={this.state.descricao}
-                                />
-                            </Form.Item>
+                        <div style={{ background: '#fff', padding: 20, minHeight: 280 }}>
+                            <Form onSubmit={this.handleSubmit} layout='vertical' >
+                                <Steps current={current} style={{ marginBottom: 20 }}>
+                                    {steps.map(item => <Step key={item.title} title={item.title} />)}
+                                </Steps>
+                                <div style={{ background: '#fff', padding: 20, minHeight: 280 }}>
+                                    <If test={(steps[this.state.current].content) === 'Grupo-content'} >
+                                        <Form.Item label="Nome do grupo">
+                                            <Input
+                                                name='nome'
+                                                onChange={this.handleChange.bind(this)}
+                                                value={this.state.nome}
+                                            />
+                                        </Form.Item>
+                                        <Form.Item label="Descrição do grupo">
+                                            <TextArea
+                                                placeholder="Informe uma descrição sobre esse grupo"
+                                                name='descricao'
+                                                onChange={this.handleChange.bind(this)}
+                                                autosize={{ minRows: 2, maxRows: 6 }}
+                                                required={true}
+                                                value={this.state.descricao}
+                                            />
+                                        </Form.Item>
+                                        <Row gutter={24}>
+                                            <Col span={10}>
+                                                <Form.Item label="Dia de pagamento">
+                                                    <InputNumber
+                                                        min={5}
+                                                        max={8}
+                                                        name='diaPagamento'
+                                                        value={this.state.diaPagamento}
+                                                        onChange={this.handleDiaPagamentoChange}
+                                                    />
+                                                </Form.Item>
+                                            </Col>
+                                            <Col span={10}>
+                                                <Form.Item label="Dia de recebimento">
+                                                    <InputNumber
+                                                        min={10}
+                                                        max={15}
+                                                        name='diaPagamento'
+                                                        value={this.state.diaRecebimento}
+                                                        onChange={this.handleDiaRecebimentoChange}
+                                                    />
+                                                </Form.Item>
+                                            </Col>
+                                        </Row>
+
+                                        <Row gutter={24}>
+                                            <Col span={10}>
+                                                <Form.Item label="Mês/Ano Início">
+                                                    <MonthPicker
+                                                        name='mesAnoInicio'
+                                                        placeholder='Selecione a data'
+                                                        format={mesFormat}
+                                                        value={moment(this.state.mesAnoInicio)}
+                                                        onChange={this.handleDataInicioChange}
+                                                    />
+                                                </Form.Item>
+                                            </Col>
+                                            <Col span={10}>
+                                                <Form.Item label="Mês/Ano Fim">
+                                                    <MonthPicker
+                                                        name='mesAnoFim'
+                                                        placeholder='Selecione a data'
+                                                        format={mesFormat}
+                                                        value={moment(this.state.mesAnoFim)}
+                                                        onChange={this.handleDataFimChange}
+                                                    />
+                                                </Form.Item>
+                                            </Col>
+                                        </Row>
+                                    </If>
+                                    <If test={(steps[this.state.current].content) === 'Valores-content'} >
+                                        <Row gutter={24}>
+                                            <Col span={10}>
+                                                <Form.Item label="Mensalidade - R$">
+                                                    <Input
+                                                        name="valorMensal"
+                                                        type="text"
+                                                        value={this.state.valorMensal}
+                                                        onChange={this.handleChange}
+                                                    />
+                                                </Form.Item>
+                                            </Col>
+                                        </Row>
+                                        <Row gutter={24}>
+                                            <Col span={10}>
+                                                <Form.Item label="Juros mensal - %">
+                                                    <Input
+                                                        name="jurosMensal"
+                                                        type="text"
+                                                        value={this.state.jurosMensal}
+                                                        onChange={this.handleChange}
+                                                    />
+                                                </Form.Item>
+                                            </Col>
+                                        </Row>
+                                    </If>
+                                    <If test={(steps[this.state.current].content) === 'Participantes-content'} >
+                                    {formItems}
+                                    <FormItem>
+                                        <Button
+                                            type="dashed"
+                                            onClick={this.add}
+                                            style={{ width: '60%' }}>
+                                            <Icon type="plus"/>
+                                            Adicionar participante
+                                        
+                                        </Button>
+                                    </FormItem>
+                                </If>
 
 
-                            {/*
-                            <Form.Item label="Dia de pagamento">
-                                <Select
-                                    defaultValue="5"
-                                    onChange={this.handleSelect.bind(this)}
-                                    style={{ width: 180 }}>
-                                    {this.state.dias}
-                                </Select>
-                            </Form.Item>
-                            <Form.Item label="Dia de recebimento">
-                                <Select
-                                    defaultValue="10"
-                                    onChange={this.handleSelect.bind(this)}
-                                    style={{ width: 180 }} >
-                                    {this.state.dias}
-                                </Select>
-                            </Form.Item>
-                            <Form.Item label="Mês/Ano Início">
-                                <MonthPicker
-                                    format={mesFormat}
-                                />
-                            </Form.Item>
-                            <Form.Item label="Mês/Ano Fim">
-                                <MonthPicker
-                                    format={mesFormat}
-                                />
-                            </Form.Item> */}
-                        </Form>
+
+                                </div>
+                                <div className="steps-action">
+                                    <ButtonGroup>
+                                        <Button 
+                                            type="primary"
+                                            style={{ marginLeft: 8 }} 
+                                            onClick={() => this.prev()}
+                                            disabled={this.state.current  <= 0}
+                                            >
+                                            <Icon type="left" />
+                                            Voltar
+                                        </Button>
+                                        <Button 
+                                            type="primary"
+                                            onClick={() => this.next()}
+                                            disabled={this.state.current >= 2}
+                                            >
+                                            Próximo
+                                            <Icon type="right" />
+                                        </Button>
+                                    </ButtonGroup>
+                                </div>
+                            </Form>
+                        </div>
                     </Modal>
-                    <Table
-                        pagination={{
-                            pageSizeOptions: ['30', '50'],
-                            showSizeChanger: true
-                        }}
-                        dados={this.state.grupos}
-                        deletarGrupo={this.deletarGrupo}
-                        handleEdit={(id) => this.handleEdit(id)}
-                    />
+                    <Spin
+                        tip='Carregando...'
+                        spinning={this.state.tableLoading}>
+                        <Table
+                            pagination={{
+                                pageSizeOptions: ['30', '50'],
+                                showSizeChanger: true
+                            }}
+                            dados={this.state.grupos}
+                            deletarGrupo={this.deletarGrupo}
+                            handleEdit={(id) => this.handleEdit(id)}
+                        />
+                    </Spin>
                 </Tamplate>
             </div >
         )
