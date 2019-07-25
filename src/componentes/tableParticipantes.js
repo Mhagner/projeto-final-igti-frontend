@@ -7,27 +7,14 @@ import { Table, Divider, Icon, Popconfirm } from 'antd';
 export default (props) => {
     const columns = [
         {
-            title: 'Nome do Grupo',
+            title: 'Participante',
             dataIndex: 'nome',
             render: text => <a href="javascript:;">{text}</a>,
         },
         {
-            title: 'Valor Mensal',
-            dataIndex: 'valorMensal',
-            render: valor => 
-                <a href="javascript:;">
-                    {valor.$numberDecimal.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}
-                </a>
-        },
-        {
-            title: 'Mês/Ano Início',
-            dataIndex: 'mesAnoInicio',
-            render: date1 => <a href="javascript:;">{moment(date1).format("MM/YYYY")}</a>
-        },
-        {
-            title: 'Mês/Ano Fim',
-            dataIndex: 'mesAnoFim',
-            render: date2 => <a href="javascript:;">{moment(date2).format("MM/YYYY")}</a>
+            title: 'E-mail',
+            dataIndex: 'email',
+            render: text => <a href="javascript:;">{text}</a>,
         },
         {
             title: 'Ação',
@@ -36,7 +23,7 @@ export default (props) => {
                     <span>
                         <a 
                             href="javascript:;"
-                            onClick={(e) => props.handleEdit(grupo._id)}
+                            //onClick={(e) => props.handleEdit(grupo._id)}
                             >
                             <Icon 
                                 type="user-add" 
@@ -53,7 +40,7 @@ export default (props) => {
                         <Divider type="vertical" />
                         <Popconfirm
                             title='Deseja mesmo excluir?'
-                            onConfirm={() => props.deletarGrupo(grupo)}
+                            //onConfirm={() => props.deletarGrupo(grupo)}
                             cancelText='Não'
                             okText='Sim'>
                             <a
