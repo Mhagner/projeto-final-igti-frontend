@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
-import { maskCurrency, formatReal } from '../funcoes/utils'
+import { formatMoney } from '../funcoes/utils'
 import moment from 'moment'
+//import ptbr from 'antd/lib/locale-provider/pt_BR'
+
 import Card from '../componentes/card'
 import Table from '../componentes/table'
 import TableParticipantes from '../componentes/tableParticipantes'
@@ -43,7 +45,7 @@ const steps = [{
 }, {
     title: 'Valores',
     content: 'Valores-content',
-},{
+}, {
     title: 'Participantes',
     content: 'Participantes-content',
 }];
@@ -68,6 +70,7 @@ class Grupo extends Component {
             valorMensal: undefined,
             jurosMensal: undefined,
             jurosAcumulativo: false,
+            participantes: [{ nome: [{}] },{ email: [{}] }],
             loading: false,
             tableLoading: false,
             grupos: [],
@@ -86,7 +89,7 @@ class Grupo extends Component {
             .then(response => this.setState({ grupos: response.data }))
             //.then(response => console.log(response.data))
             .then(response => this.setState({ tableLoading: false }))
-            .then(response => console.log(this.state.grupos.map(grupo => grupo.participantes)))
+            //.then(response => console.log(this.state.grupos.map(grupo => grupo.participantes)))
             .catch(error => {
                 console.log(error)
             })
@@ -95,27 +98,24 @@ class Grupo extends Component {
     handleSubmit = (e) => {
         e.preventDefault()
 
-        this.setState({ 
+        this.setState({
             mesAnoInicio: moment(moment(this.state.mesAnoInicio).format("L"), "MMDDYYYY").format(),
             mesAnoFim: moment(moment(this.state.mesAnoFim).format("L"), "MMDDYYYY").format()
         })
-        
-        const { nome, descricao, diaPagamento, diaRecebimento, mesAnoInicio, mesAnoFim, 
-                valorMensal, jurosAcumulativo, jurosMensal } = this.state
+
+        const { nome, descricao, diaPagamento, diaRecebimento, mesAnoInicio, mesAnoFim,
+            valorMensal, jurosAcumulativo, jurosMensal, participantes } = this.state
 
         this.setState({ loading: true })
 
-        api.post(`/grupos`, { nome, descricao, diaPagamento, diaRecebimento, mesAnoInicio, 
-            mesAnoFim, valorMensal, jurosAcumulativo, jurosMensal })
+        api.post(`/grupos`, {
+            nome, descricao, diaPagamento, diaRecebimento, mesAnoInicio,
+            mesAnoFim, valorMensal, jurosAcumulativo, jurosMensal, participantes
+        })
             .then(response => [
                 this.setState({ loading: false }),
-                notification.success({
-                    message: 'Sucesso!',
-                    description:
-                        response.data.message.toString()
-                }),
                 this.limpaCampos(),
-                this.setState({ 
+                this.setState({
                     visible: false
                 }),
                 this.listarGrupos()
@@ -197,6 +197,15 @@ class Grupo extends Component {
         })
 
         const firtItem = grupos[0]
+        let parts = []
+        parts = firtItem.participantes
+
+        let partsNome = parts.map(p => (p.nome))
+        let partsEmail = parts.map(p => (p.email))
+
+        console.log(partsNome)
+        console.log(partsEmail)
+    
 
         this.setState({
             ...this.state,
@@ -206,17 +215,20 @@ class Grupo extends Component {
             diaRecebimento: firtItem.diaRecebimento,
             mesAnoInicio: firtItem.mesAnoInicio,
             mesAnoFim: firtItem.mesAnoFim,
-            valorMensal: firtItem.valorMensal.$numberDecimal,
+            valorMensal: firtItem.valorMensal,
             jurosAcumulativo: firtItem.jurosAcumulativo,
             jurosMensal: firtItem.jurosMensal,
-            participantes: firtItem.participantes[0]
+            participantes: [
+                {nome: partsNome},
+                {email: partsEmail}
+            ]
         })
 
         this.showModal()
     }
 
     handleCancel = () => {
-        this.setState({ 
+        this.setState({
             visible: false
         });
         this.limpaCampos()
@@ -264,15 +276,16 @@ class Grupo extends Component {
         });
     };
 
-    handleChecked = (checked) =>{
-       this.setState({ jurosAcumulativo: checked})
+    handleChecked = (checked) => {
+        this.setState({ jurosAcumulativo: checked })
 
-       return (this.state.jurosAcumulativo)?
-                this.setState({ jurosMensal: undefined }):null
+        return (this.state.jurosAcumulativo) ?
+            this.setState({ jurosMensal: undefined }) : null
     }
 
     componentDidMount() {
         this.listarGrupos()
+        console.log(this.state.grupos.participantes)
     }
 
     next() {
@@ -312,7 +325,17 @@ class Grupo extends Component {
         });
     }
 
-    
+    handleParticipanteEmailChange = (value, index) => {
+        let dados = this.state.participantes
+        dados[index].email = value
+        this.setState({ participantes: dados })
+    }
+
+    handleParticipanteNomeChange = (value, index) => {
+        let dados = this.state.participantes
+        dados[index].nome = value
+        this.setState({ participantes: dados })
+    }
 
     render() {
         const formItemLayout = {
@@ -321,11 +344,17 @@ class Grupo extends Component {
         };
         const { getFieldDecorator, getFieldValue } = this.props.form;
         const { TextArea } = Input;
-        const { visible, loading, current } = this.state;
-        getFieldDecorator('keys', { initialValue: [] });
+        const { visible, loading, current, grupos } = this.state;
+
+        getFieldDecorator('keys', { initialValue: []  });
         const keys = getFieldValue('keys');
 
+        //console.log(this.state.participantes)
+
         const formItems = keys.map((item, index) => {
+            item = 'participantes'
+            //console.log(`${this.state.participantes}[${index}].nome`)
+            const { participantes } = this.state
             return (
                 <Row gutter={16}>
                     <Col span={10}>
@@ -333,15 +362,17 @@ class Grupo extends Component {
                             required={false}
                             key={index}
                         >
-                        {getFieldDecorator(`${item}[nome][${index}]`)(
-                             
-                            <Input 
-                                name='nome'
-                                placeholder="Nome" 
-                                style={{ width: '100%', marginRight: 10 }} 
-                                onChange={this.testeChange}
-                            />
-                        )}
+                            {getFieldDecorator(`${item}[${index}].nome`)(
+
+                                <Input
+                                    name={`${item}[${index}][nome]`}
+                                    placeholder="Nome"
+                                    style={{ width: '100%', marginRight: 10 }}
+                                    onChange={(e) => this.handleParticipanteNomeChange(e.target.value, index)}
+                                //value={this.state.participantes[`${index}`].nome}
+                                />
+
+                            )}
                         </FormItem>
                     </Col>
                     <Col span={12}>
@@ -349,18 +380,17 @@ class Grupo extends Component {
                             required={false}
                             key={index}
                         >
-                        {getFieldDecorator(`${item}[email][${index}]`)(
-                           
-                            <Input 
-                                name={`${item}`}
-                                placeholder="E-mail" 
-                                style={{ width: '100%', marginRight: 10 }} 
-                                onChange={this.handleChange}
-                            />
-                        )}
-                        
+                            {getFieldDecorator(`${item}[${index}].email`)(
+
+                                <Input
+                                    name={`${item}[${index}][email]`}
+                                    placeholder="E-mail"
+                                    style={{ width: '100%', marginRight: 10 }}
+                                    onChange={(e) => this.handleParticipanteEmailChange(e.target.value, index)}
+                                />
+                            )}
                         </FormItem>
-                      
+
                     </Col>
                     <Col span={2}>
                         <If test={keys.length > 1}>
@@ -467,6 +497,7 @@ class Grupo extends Component {
                                             <Col span={10}>
                                                 <Form.Item label="Mês/Ano Início">
                                                     <MonthPicker
+                                                        //locale={ptbr}
                                                         name='mesAnoInicio'
                                                         placeholder='Selecione a data'
                                                         format={mesFormat}
@@ -504,7 +535,7 @@ class Grupo extends Component {
                                         <Row gutter={24}>
                                             <Col span={10}>
                                                 <Form.Item label="Juros acumulativo mensal?">
-                                                    <Switch 
+                                                    <Switch
                                                         onChange={this.handleChecked}
                                                         defaultChecked={this.state.jurosAcumulativo}
                                                     />
@@ -535,41 +566,28 @@ class Grupo extends Component {
                                                 type="dashed"
                                                 onClick={this.add}
                                                 style={{ width: '60%' }}>
-                                                <Icon type="plus"/>
+                                                <Icon type="plus" />
                                                 Adicionar participante
-                                            
                                             </Button>
                                         </FormItem>
-                                        <TableParticipantes
-                                            pagination={{
-                                                pageSizeOptions: ['30', '50'],
-                                                showSizeChanger: true
-                                            }}
-                                            dados={this.state.grupos.map(grupo => grupo.participantes)}
-                                            //deletarGrupo={this.deletarGrupo}
-                                            //handleEdit={(id) => this.handleEdit(id)}
-                                         />
                                     </If>
-
-
-
                                 </div>
                                 <div className="steps-action">
                                     <ButtonGroup>
-                                        <Button 
+                                        <Button
                                             type="primary"
-                                            style={{ marginLeft: 8 }} 
+                                            style={{ marginLeft: 8 }}
                                             onClick={() => this.prev()}
-                                            disabled={this.state.current  <= 0}
-                                            >
+                                            disabled={this.state.current <= 0}
+                                        >
                                             <Icon type="left" />
                                             Voltar
                                         </Button>
-                                        <Button 
+                                        <Button
                                             type="primary"
                                             onClick={() => this.next()}
                                             disabled={this.state.current >= 2}
-                                            >
+                                        >
                                             Próximo
                                             <Icon type="right" />
                                         </Button>

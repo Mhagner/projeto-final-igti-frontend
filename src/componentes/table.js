@@ -1,8 +1,10 @@
 
 import React from 'react'
 import moment from 'moment'
+import numeral from 'numeral'
+import { numberToReal, formatMoney } from '../funcoes/utils'
 
-import { Table, Divider, Icon, Popconfirm } from 'antd';
+import { Table, Divider, Icon, Popconfirm, Row } from 'antd';
 
 export default (props) => {
     const columns = [
@@ -14,9 +16,9 @@ export default (props) => {
         {
             title: 'Valor Mensal',
             dataIndex: 'valorMensal',
-            render: valor => 
+            render: valorMensal =>
                 <a href="javascript:;">
-                    {valor.$numberDecimal.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}
+                    {formatMoney(valorMensal, 2, 'R$ ', '.', ',')}
                 </a>
         },
         {
@@ -34,21 +36,21 @@ export default (props) => {
             render: (text, grupo) =>
                 props.dados.length >= 1 ? (
                     <span>
-                        <a 
+                        <a
                             href="javascript:;"
                             onClick={(e) => props.handleEdit(grupo._id)}
-                            >
-                            <Icon 
-                                type="user-add" 
-                                theme="twoTone" 
+                        >
+                            <Icon
+                                type="user-add"
+                                theme="twoTone"
                                 style={{ fontSize: '24px' }}
                             />
-                               <Icon 
-                                    type="plus-circle" 
-                                    style={{ fontSize: '24px' }} 
-                                    theme="twoTone" 
-                                    twoToneColor="#52c41a" 
-                                />
+                            <Icon
+                                type="plus-circle"
+                                style={{ fontSize: '24px' }}
+                                theme="twoTone"
+                                twoToneColor="#52c41a"
+                            />
                         </a>
                         <Divider type="vertical" />
                         <Popconfirm
@@ -59,11 +61,11 @@ export default (props) => {
                             <a
                                 href="javascript:;"
                             >
-                            <Icon 
-                                type="delete" 
-                                theme="twoTone" 
-                                twoToneColor="#eb2f96" 
-                                style={{ fontSize: '24px' }}/>
+                                <Icon
+                                    type="delete"
+                                    theme="twoTone"
+                                    twoToneColor="#eb2f96"
+                                    style={{ fontSize: '24px' }} />
                             </a>
                         </Popconfirm>
                     </span>
@@ -72,6 +74,8 @@ export default (props) => {
 
     ];
     return (
-        <Table dataSource={props.dados} columns={columns} rowKey='_id' />
+        <Row gutter={{ xs: 16, sm: 8, md: 24}}>
+            <Table dataSource={props.dados} columns={columns} rowKey='_id' />
+        </Row>
     )
 }
