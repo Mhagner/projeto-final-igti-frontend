@@ -70,12 +70,17 @@ class Grupo extends Component {
             valorMensal: undefined,
             jurosMensal: undefined,
             jurosAcumulativo: false,
-            participantes: [{ nome: [{}] },{ email: [{}] }],
+            participantes: [
+                {nome:  []},
+                {email: []}
+            ],
             loading: false,
             tableLoading: false,
             grupos: [],
             visible: false,
             current: 0,
+            edicao: false,
+            array: []
         }
 
         this.limpaCampos = this.limpaCampos.bind(this)
@@ -87,9 +92,7 @@ class Grupo extends Component {
         this.setState({ tableLoading: true })
         api.get('/grupos')
             .then(response => this.setState({ grupos: response.data }))
-            //.then(response => console.log(response.data))
             .then(response => this.setState({ tableLoading: false }))
-            //.then(response => console.log(this.state.grupos.map(grupo => grupo.participantes)))
             .catch(error => {
                 console.log(error)
             })
@@ -174,6 +177,8 @@ class Grupo extends Component {
     limpaCampos() {
         this.setState({
             nome: '',
+            edicao: false,
+            grupos: [],
             descricao: '',
             diaPagamento: '',
             diaRecebimento: '',
@@ -181,8 +186,15 @@ class Grupo extends Component {
             mesAnoInicio: undefined,
             mesAnoFim: undefined,
             valorMensal: undefined,
-            jurosMensal: undefined
+            jurosMensal: undefined,
+            participantes: [
+                { nome: [] },
+                { email: [] }
+            ],
+            array: []
         })
+        this.listarGrupos()
+
     }
 
     showModal = () => {
@@ -190,6 +202,7 @@ class Grupo extends Component {
             visible: true,
         });
     };
+
 
     handleEdit = (id) => {
         const grupos = this.state.grupos.filter((grupo) => {
@@ -203,10 +216,6 @@ class Grupo extends Component {
         let partsNome = parts.map(p => (p.nome))
         let partsEmail = parts.map(p => (p.email))
 
-        console.log(partsNome)
-        console.log(partsEmail)
-    
-
         this.setState({
             ...this.state,
             nome: firtItem.nome,
@@ -218,11 +227,14 @@ class Grupo extends Component {
             valorMensal: firtItem.valorMensal,
             jurosAcumulativo: firtItem.jurosAcumulativo,
             jurosMensal: firtItem.jurosMensal,
+            edicao: true,
             participantes: [
-                {nome: partsNome},
-                {email: partsEmail}
+                { nome: partsNome },
+                { email: partsEmail }
             ]
         })
+
+        this.setState({ array: this.state.grupos[0].participantes })
 
         this.showModal()
     }
@@ -285,7 +297,6 @@ class Grupo extends Component {
 
     componentDidMount() {
         this.listarGrupos()
-        console.log(this.state.grupos.participantes)
     }
 
     next() {
@@ -318,6 +329,7 @@ class Grupo extends Component {
         // can use data-binding to get
         const keys = form.getFieldValue('keys');
         const nextKeys = keys.concat(uuid);
+        console.log(nextKeys)
         // can use data-binding to set
         // important! notify form to detect changes
         form.setFieldsValue({
@@ -337,6 +349,10 @@ class Grupo extends Component {
         this.setState({ participantes: dados })
     }
 
+    atualizaStadoDoArray = (array) => {
+        this.setState({ participantes: array })
+    }
+
     render() {
         const formItemLayout = {
             labelCol: { span: 6 },
@@ -344,16 +360,31 @@ class Grupo extends Component {
         };
         const { getFieldDecorator, getFieldValue } = this.props.form;
         const { TextArea } = Input;
-        const { visible, loading, current, grupos } = this.state;
+        const { visible, loading, current, grupos, edicao } = this.state;
 
-        getFieldDecorator('keys', { initialValue: []  });
+
+        getFieldDecorator('keys', { initialValue: (edicao) ? this.state.array : [] });
+
         const keys = getFieldValue('keys');
 
-        //console.log(this.state.participantes)
 
         const formItems = keys.map((item, index) => {
-            item = 'participantes'
-            //console.log(`${this.state.participantes}[${index}].nome`)
+
+            const part = 'participantes'
+
+            getFieldDecorator(`${item}[${index}].nome`, {
+                initialValue: item.nome
+            })
+            getFieldDecorator(`${item}[${index}].email`, {
+                initialValue: item.email
+            })
+
+            //const dados = getFieldValue('keys')
+
+            //this.atualizaStadoDoArray(dados)
+
+            console.log(this.state.participantes)
+
             const { participantes } = this.state
             return (
                 <Row gutter={16}>
@@ -363,15 +394,12 @@ class Grupo extends Component {
                             key={index}
                         >
                             {getFieldDecorator(`${item}[${index}].nome`)(
-
                                 <Input
-                                    name={`${item}[${index}][nome]`}
+                                    name={`${part}[${index}][nome]`}
                                     placeholder="Nome"
                                     style={{ width: '100%', marginRight: 10 }}
                                     onChange={(e) => this.handleParticipanteNomeChange(e.target.value, index)}
-                                //value={this.state.participantes[`${index}`].nome}
                                 />
-
                             )}
                         </FormItem>
                     </Col>
@@ -381,16 +409,14 @@ class Grupo extends Component {
                             key={index}
                         >
                             {getFieldDecorator(`${item}[${index}].email`)(
-
                                 <Input
-                                    name={`${item}[${index}][email]`}
+                                    name={`${part}[${index}][email]`}
                                     placeholder="E-mail"
                                     style={{ width: '100%', marginRight: 10 }}
                                     onChange={(e) => this.handleParticipanteEmailChange(e.target.value, index)}
                                 />
                             )}
                         </FormItem>
-
                     </Col>
                     <Col span={2}>
                         <If test={keys.length > 1}>
@@ -439,16 +465,17 @@ class Grupo extends Component {
                                         loading={loading}
                                         onClick={this.handleSubmit}>
                                         Salvar
-                                </Button>
+                                    </Button>
                                 </If>
-
                             ]}
                     >
                         <div style={{ background: '#fff', padding: 20, minHeight: 280 }}>
                             <Form onSubmit={this.handleSubmit} layout='vertical' >
+
                                 <Steps current={current} style={{ marginBottom: 20 }}>
                                     {steps.map(item => <Step key={item.title} title={item.title} />)}
                                 </Steps>
+
                                 <div style={{ background: '#fff', padding: 20, minHeight: 280 }}>
                                     <If test={(steps[this.state.current].content) === 'Grupo-content'} >
                                         <Form.Item label="Nome do grupo">
@@ -497,7 +524,6 @@ class Grupo extends Component {
                                             <Col span={10}>
                                                 <Form.Item label="Mês/Ano Início">
                                                     <MonthPicker
-                                                        //locale={ptbr}
                                                         name='mesAnoInicio'
                                                         placeholder='Selecione a data'
                                                         format={mesFormat}
@@ -598,7 +624,8 @@ class Grupo extends Component {
                     </Modal>
                     <Spin
                         tip='Carregando...'
-                        spinning={this.state.tableLoading}>
+                        spinning={this.state.tableLoading}
+                    >
                         <Table
                             pagination={{
                                 pageSizeOptions: ['30', '50'],
@@ -615,6 +642,6 @@ class Grupo extends Component {
     }
 }
 
-const WrappedApp = Form.create({ name: 'formGrupo' })(Grupo);
+const GrupoPage = Form.create({ name: 'formGrupo' })(Grupo);
 
-export default WrappedApp
+export default GrupoPage
