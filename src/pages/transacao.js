@@ -46,7 +46,8 @@ class transacao extends Component {
                 mesAnoInicio: response.data.mesAnoInicio,
                 mesAnoFim: response.data.mesAnoFim,
                 valorMensal: response.data.valorMensal,
-                jurosMensal: response.data.jurosMensal
+                jurosMensal: response.data.jurosMensal,
+                participantes: response.data.participantes
             }))
             .then(response => this.setState({ loading: false }))
     }
@@ -63,11 +64,25 @@ class transacao extends Component {
 
     componentDidMount() {
         this.listaGrupos()
-        // this.listaDadosDeUmGrupo(this.state._id || '')
+    }
+
+    calcularValorAPagar = (valor, juros, cont) => {
+        var i = 0
+        var dados = []
+        var valorAcumulado = 0
+        for (i = 0; i < cont; i++) {
+            if (i === 0) {
+                valorAcumulado = valor
+            } else {
+                valorAcumulado = valorAcumulado + (valorAcumulado * juros / 100)
+            }
+            dados.push(formatMoney(valorAcumulado, 2, 'R$ ', '.', ','))
+        }
+        return dados
     }
 
     render() {
-        const { grupo, mesesTab, grupos, descricao, mesAnoFim, mesAnoInicio, valorMensal, jurosMensal } = this.state
+        const { participantes, grupo, mesesTab, grupos, descricao, mesAnoFim, mesAnoInicio, valorMensal, jurosMensal } = this.state
 
         const lista = grupos || []
         const renderGrupos = lista.map(grupo => (
@@ -76,7 +91,9 @@ class transacao extends Component {
 
         var inicio = moment(mesAnoInicio)
         var fim = moment(mesAnoFim)
-        var qtdeMeses = fim.diff(inicio, 'months') + 1
+        var qtdeMeses = (fim.diff(inicio, 'months') + 1)
+        var aux = [{ ordem: '1º', nome: 'Mahilson' }, { ordem: '2º', nome: 'Flavia' }]
+        var valores = this.calcularValorAPagar(valorMensal, jurosMensal, qtdeMeses)
 
         const renderTabs =
             [...Array(qtdeMeses).keys()].map(i => (
@@ -84,7 +101,23 @@ class transacao extends Component {
                     tab={moment(inicio.add((i < 2) ? i : 1, 'month')).format('MMMM/YYYY')}
                     key={i}
                 >
-                    <h3>{i}</h3>
+                    <Descriptions title="" layout="vertical">
+                        <DescriptionsItem label="Ordem/participante">
+                            {(grupo && participantes) ? participantes.map(p => (
+                                <p>{p.nome}</p>
+                            )) : undefined}
+                        </DescriptionsItem>
+                        <DescriptionsItem label="Valor a pagar">
+                            {(grupo && participantes) ? participantes.map(p => (
+                                <p>{valores[i]}</p>
+                            )) : undefined}
+                        </DescriptionsItem>
+                        <DescriptionsItem label="Valor a receber">
+                            {(grupo && participantes) ? participantes.map(p => (
+                                <p>{valores[i]}</p>
+                            )) : undefined}
+                        </DescriptionsItem>
+                    </Descriptions>
                 </TabPane>
             ))
 
@@ -112,49 +145,48 @@ class transacao extends Component {
                         </Form>
                     </Col>
                 </Row>
-                <Row gutter={24}>
-                    <Col span={24}>
+                <If test={grupo}>
+                    <Spin
+                        tip='Carregando...'
+                        spinning={this.state.loading}>
                         <Divider />
-                        <Spin
-                            tip='Carregando...'
-                            spinning={this.state.loading}>
-                            <Descriptions title="" layout="vertical">
-                                <DescriptionsItem label="Descrição do grupo">
-                                    {descricao}
-                                </DescriptionsItem>
-                                <DescriptionsItem label="Mês/Ano inicio">
-                                    {(grupo) ? moment(mesAnoInicio).format("MMMM/YYYY") : undefined}
-                                </DescriptionsItem>
-                                <DescriptionsItem label="Mês/Ano fim">
-                                    {(grupo) ? moment(mesAnoFim).format("MMMM/YYYY") : undefined}
-                                </DescriptionsItem>
-                                <DescriptionsItem label="Mensalidade">
-                                    {formatMoney(valorMensal, 2, 'R$ ', '.', ',')}
-                                </DescriptionsItem>
-                                <DescriptionsItem label="Juros mensal">
-                                    {jurosMensal} %
+                        <Row gutter={24}>
+                            <Col span={24}>
+
+                                <Descriptions title="" layout="vertical">
+                                    <DescriptionsItem label="Descrição do grupo">
+                                        {descricao}
                                     </DescriptionsItem>
-                                <DescriptionsItem label="Duração em meses">
-                                    {qtdeMeses}
-                                </DescriptionsItem>
-                            </Descriptions>
-                        </Spin>
-                    </Col>
-                </Row>
-                <Divider />
-                <Row gutter={24}>
-                    <Col span={24}>
-                        <div>
-                            <Spin
-                                tip='Carregando...'
-                                spinning={this.state.loading}>
-                                <Tabs type="card" style={{ height: 220 }}>
-                                    {renderTabs}
-                                </Tabs>
-                            </Spin>
-                        </div>
-                    </Col>
-                </Row>
+                                    <DescriptionsItem label="Mês/Ano inicio">
+                                        {(grupo) ? moment(mesAnoInicio).format("MMMM/YYYY") : undefined}
+                                    </DescriptionsItem>
+                                    <DescriptionsItem label="Mês/Ano fim">
+                                        {(grupo) ? moment(mesAnoFim).format("MMMM/YYYY") : undefined}
+                                    </DescriptionsItem>
+                                    <DescriptionsItem label="Mensalidade">
+                                        {(grupo) ? formatMoney(valorMensal, 2, 'R$ ', '.', ',') : undefined}
+                                    </DescriptionsItem>
+                                    <DescriptionsItem label="Juros mensal">
+                                        {(grupo) ? jurosMensal : undefined}%
+                                    </DescriptionsItem>
+                                    <DescriptionsItem label="Duração em meses">
+                                        {(grupo) ? qtdeMeses : undefined}
+                                    </DescriptionsItem>
+                                </Descriptions>
+                            </Col>
+                        </Row>
+                        <Divider />
+                        <Row gutter={24}>
+                            <Col span={24}>
+                                <div>
+                                    <Tabs type="card" style={{ height: 220 }}>
+                                        {renderTabs}
+                                    </Tabs>
+                                </div>
+                            </Col>
+                        </Row>
+                    </Spin>
+                </If>
             </Tamplate >
         )
     }
