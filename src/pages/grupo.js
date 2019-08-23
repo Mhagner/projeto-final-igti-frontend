@@ -71,8 +71,8 @@ class Grupo extends Component {
             jurosMensal: undefined,
             jurosAcumulativo: false,
             participantes: [
-                {nome:  []},
-                {email: []}
+                { nome: [] },
+                { email: [] }
             ],
             loading: false,
             tableLoading: false,
@@ -309,6 +309,13 @@ class Grupo extends Component {
         this.setState({ current })
     }
 
+    calculaQuantidadeDeMeses = () => {
+        var inicio = moment(this.state.mesAnoInicio)
+        var fim = moment(this.state.mesAnoFim)
+        var qtdeMeses = (fim.diff(inicio, 'months') + 1)
+        return qtdeMeses
+    }
+
     remove = (k) => {
         const { form } = this.props;
         // can use data-binding to get
@@ -324,17 +331,23 @@ class Grupo extends Component {
     }
 
     add = () => {
+
         uuid++;
         const { form } = this.props;
         // can use data-binding to get
         const keys = form.getFieldValue('keys');
-        const nextKeys = keys.concat(uuid);
-        console.log(nextKeys)
-        // can use data-binding to set
-        // important! notify form to detect changes
-        form.setFieldsValue({
-            keys: nextKeys,
-        });
+
+        var meses = this.calculaQuantidadeDeMeses()
+
+        if (keys.length < meses) {
+            const nextKeys = keys.concat(uuid);
+            // can use data-binding to set
+            // important! notify form to detect changes
+
+            form.setFieldsValue({
+                keys: nextKeys,
+            });
+        } else return;
     }
 
     handleParticipanteEmailChange = (value, index) => {
@@ -379,11 +392,6 @@ class Grupo extends Component {
                 initialValue: item.email
             })
 
-            //const dados = getFieldValue('keys')
-
-            //this.atualizaStadoDoArray(dados)
-
-            console.log(this.state.participantes)
 
             const { participantes } = this.state
             return (
@@ -586,6 +594,7 @@ class Grupo extends Component {
                                         </Row>
                                     </If>
                                     <If test={(steps[this.state.current].content) === 'Participantes-content'} >
+                                        <p>Quantidade de participantes possíveis: {this.calculaQuantidadeDeMeses()}</p>
                                         {formItems}
                                         <FormItem>
                                             <Button

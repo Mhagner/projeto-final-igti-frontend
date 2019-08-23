@@ -76,13 +76,9 @@ class transacao extends Component {
             } else {
                 valorAcumulado = valorAcumulado + (valorAcumulado * juros / 100)
             }
-            dados.push(formatMoney(valorAcumulado, 2, 'R$ ', '.', ','))
+            dados.push(valorAcumulado)
         }
         return dados
-    }
-
-    calcularValorAReceber = () => {
-
     }
 
     render() {
@@ -96,7 +92,6 @@ class transacao extends Component {
         var inicio = moment(mesAnoInicio)
         var fim = moment(mesAnoFim)
         var qtdeMeses = (fim.diff(inicio, 'months') + 1)
-        var aux = [{ ordem: '1º', nome: 'Mahilson' }, { ordem: '2º', nome: 'Flavia' }]
         var valorAPagar = this.calcularValorAPagar(valorMensal, jurosMensal, qtdeMeses)
 
         const renderTabs =
@@ -107,18 +102,22 @@ class transacao extends Component {
                 >
                     <Descriptions title="" layout="vertical">
                         <DescriptionsItem label="Ordem/participante">
-                            {(grupo && participantes) ? participantes.map(p => (
-                                <p>{p.nome}</p>
+                            {(grupo && participantes) ? participantes.map((p, indice) => (
+                                <p>{indice + 1} - {p.nome}</p>
                             )) : undefined}
                         </DescriptionsItem>
                         <DescriptionsItem label="Valor a pagar">
                             {(grupo && participantes) ? participantes.map(p => (
-                                <p>{valorAPagar[i]}</p>
+                                <p>{formatMoney(valorAPagar[i], 2, 'R$ ', '.', ',')}</p>
                             )) : undefined}
                         </DescriptionsItem>
                         <DescriptionsItem label="Valor a receber">
-                            {(grupo && participantes) ? participantes.map(p => (
-                                <p>{valorAPagar[i]}</p>
+                            {(grupo && participantes) ? participantes.map((p, indice) => (
+                                <p>
+                                    {(indice === i) ?
+                                        (formatMoney(valorAPagar[i] * qtdeMeses, 2, 'R$ ', '.', ',')) :
+                                        (formatMoney(0, 2, 'R$ ', '.', ','))}
+                                </p>
                             )) : undefined}
                         </DescriptionsItem>
                     </Descriptions>

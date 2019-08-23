@@ -24,12 +24,12 @@ export default (props) => {
         {
             title: 'Mês/Ano Início',
             dataIndex: 'mesAnoInicio',
-            render: date1 => <a href="javascript:;">{moment(date1).format("MM/YYYY")}</a>
+            render: date1 => <a href="javascript:;">{moment(date1).format("MMMM/YYYY")}</a>
         },
         {
             title: 'Mês/Ano Fim',
             dataIndex: 'mesAnoFim',
-            render: date2 => <a href="javascript:;">{moment(date2).format("MM/YYYY")}</a>
+            render: date2 => <a href="javascript:;">{moment(date2).format("MMMM/YYYY")}</a>
         },
         {
             title: 'Ação',
