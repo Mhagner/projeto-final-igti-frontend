@@ -81,6 +81,10 @@ class transacao extends Component {
         return dados
     }
 
+    calcularValorAReceber = () => {
+
+    }
+
     render() {
         const { participantes, grupo, mesesTab, grupos, descricao, mesAnoFim, mesAnoInicio, valorMensal, jurosMensal } = this.state
 
@@ -93,7 +97,7 @@ class transacao extends Component {
         var fim = moment(mesAnoFim)
         var qtdeMeses = (fim.diff(inicio, 'months') + 1)
         var aux = [{ ordem: '1º', nome: 'Mahilson' }, { ordem: '2º', nome: 'Flavia' }]
-        var valores = this.calcularValorAPagar(valorMensal, jurosMensal, qtdeMeses)
+        var valorAPagar = this.calcularValorAPagar(valorMensal, jurosMensal, qtdeMeses)
 
         const renderTabs =
             [...Array(qtdeMeses).keys()].map(i => (
@@ -109,12 +113,12 @@ class transacao extends Component {
                         </DescriptionsItem>
                         <DescriptionsItem label="Valor a pagar">
                             {(grupo && participantes) ? participantes.map(p => (
-                                <p>{valores[i]}</p>
+                                <p>{valorAPagar[i]}</p>
                             )) : undefined}
                         </DescriptionsItem>
                         <DescriptionsItem label="Valor a receber">
                             {(grupo && participantes) ? participantes.map(p => (
-                                <p>{valores[i]}</p>
+                                <p>{valorAPagar[i]}</p>
                             )) : undefined}
                         </DescriptionsItem>
                     </Descriptions>
