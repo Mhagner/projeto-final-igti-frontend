@@ -70,10 +70,7 @@ class Grupo extends Component {
             valorMensal: undefined,
             jurosMensal: undefined,
             jurosAcumulativo: false,
-            participantes: [
-                { nome: [] },
-                { email: [] }
-            ],
+            participantes: [{}],
             loading: false,
             tableLoading: false,
             grupos: [],
@@ -188,8 +185,7 @@ class Grupo extends Component {
             valorMensal: undefined,
             jurosMensal: undefined,
             participantes: [
-                { nome: [] },
-                { email: [] }
+                { nome: [] }
             ],
             array: []
         })
@@ -214,7 +210,6 @@ class Grupo extends Component {
         parts = firtItem.participantes
 
         let partsNome = parts.map(p => (p.nome))
-        let partsEmail = parts.map(p => (p.email))
 
         this.setState({
             ...this.state,
@@ -229,8 +224,7 @@ class Grupo extends Component {
             jurosMensal: firtItem.jurosMensal,
             edicao: true,
             participantes: [
-                { nome: partsNome },
-                { email: partsEmail }
+                { nome: partsNome }
             ]
         })
 
@@ -313,7 +307,7 @@ class Grupo extends Component {
         var inicio = moment(this.state.mesAnoInicio)
         var fim = moment(this.state.mesAnoFim)
         var qtdeMeses = (fim.diff(inicio, 'months') + 1)
-        return qtdeMeses
+        return qtdeMeses + 1
     }
 
     remove = (k) => {
@@ -350,16 +344,11 @@ class Grupo extends Component {
         } else return;
     }
 
-    handleParticipanteEmailChange = (value, index) => {
-        let dados = this.state.participantes
-        dados[index].email = value
-        this.setState({ participantes: dados })
-    }
-
     handleParticipanteNomeChange = (value, index) => {
         let dados = this.state.participantes
         dados[index].nome = value
-        this.setState({ participantes: dados })
+        this.setState({ participantes: dados[index].nome })
+        console.log(this.state.participantes)
     }
 
     atualizaStadoDoArray = (array) => {
@@ -367,7 +356,7 @@ class Grupo extends Component {
     }
 
     render() {
-        const formItemLayout = {
+        const formItemLayout = {    
             labelCol: { span: 6 },
             wrapperCol: { span: 14 },
         };
@@ -388,15 +377,12 @@ class Grupo extends Component {
             getFieldDecorator(`${item}[${index}].nome`, {
                 initialValue: item.nome
             })
-            getFieldDecorator(`${item}[${index}].email`, {
-                initialValue: item.email
-            })
-
 
             const { participantes } = this.state
+
             return (
-                <Row gutter={16}>
-                    <Col span={10}>
+                <Row gutter={24}>
+                    <Col span={16}>
                         <FormItem
                             required={false}
                             key={index}
@@ -404,24 +390,9 @@ class Grupo extends Component {
                             {getFieldDecorator(`${item}[${index}].nome`)(
                                 <Input
                                     name={`${part}[${index}][nome]`}
-                                    placeholder="Nome"
+                                    placeholder="Digite o nome"
                                     style={{ width: '100%', marginRight: 10 }}
                                     onChange={(e) => this.handleParticipanteNomeChange(e.target.value, index)}
-                                />
-                            )}
-                        </FormItem>
-                    </Col>
-                    <Col span={12}>
-                        <FormItem
-                            required={false}
-                            key={index}
-                        >
-                            {getFieldDecorator(`${item}[${index}].email`)(
-                                <Input
-                                    name={`${part}[${index}][email]`}
-                                    placeholder="E-mail"
-                                    style={{ width: '100%', marginRight: 10 }}
-                                    onChange={(e) => this.handleParticipanteEmailChange(e.target.value, index)}
                                 />
                             )}
                         </FormItem>
