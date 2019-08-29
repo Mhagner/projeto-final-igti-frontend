@@ -9,6 +9,7 @@ import TableParticipantes from '../componentes/tableParticipantes'
 import Tamplate from '../layout/tamplate'
 import api from './../funcoes/api';
 import If from '../componentes/if'
+import { getUser } from '../funcoes/services'
 import { Link } from 'react-router-dom'
 import numeral from 'numeral'
 import {
@@ -27,6 +28,7 @@ import {
     Steps,
     Switch
 } from 'antd'
+import { Z_PARTIAL_FLUSH } from 'zlib';
 
 notification.config({
     bottom: 50,
@@ -70,7 +72,9 @@ class Grupo extends Component {
             valorMensal: undefined,
             jurosMensal: undefined,
             jurosAcumulativo: false,
-            participantes: [{}],
+            usuarioEmail: getUser(),
+            participantes: [],
+            dados: [{}],
             loading: false,
             tableLoading: false,
             grupos: [],
@@ -87,7 +91,8 @@ class Grupo extends Component {
 
     listarGrupos() {
         this.setState({ tableLoading: true })
-        api.get('/grupos')
+        console.log(this.state.usuarioEmail)
+        api.get(`/grupos?usuarioEmail=${this.state.usuarioEmail}`)
             .then(response => this.setState({ grupos: response.data }))
             .then(response => this.setState({ tableLoading: false }))
             .catch(error => {
@@ -103,15 +108,19 @@ class Grupo extends Component {
             mesAnoFim: moment(moment(this.state.mesAnoFim).format("L"), "MMDDYYYY").format()
         })
 
+      
+
         const { nome, descricao, diaPagamento, diaRecebimento, mesAnoInicio, mesAnoFim,
-            valorMensal, jurosAcumulativo, jurosMensal, participantes } = this.state
+            valorMensal, jurosAcumulativo, jurosMensal, participantes, dados, usuarioEmail } = this.state
+
+        console.log(participantes)
+        console.log(usuarioEmail)
 
         this.setState({ loading: true })
 
         api.post(`/grupos`, {
             nome, descricao, diaPagamento, diaRecebimento, mesAnoInicio,
-            mesAnoFim, valorMensal, jurosAcumulativo, jurosMensal, participantes
-        })
+            mesAnoFim, valorMensal, jurosAcumulativo, jurosMensal, participantes, usuarioEmail })
             .then(response => [
                 this.setState({ loading: false }),
                 this.limpaCampos(),
@@ -184,9 +193,7 @@ class Grupo extends Component {
             mesAnoFim: undefined,
             valorMensal: undefined,
             jurosMensal: undefined,
-            participantes: [
-                { nome: [] }
-            ],
+            participantes: undefined,
             array: []
         })
         this.listarGrupos()
@@ -244,6 +251,7 @@ class Grupo extends Component {
         this.setState({
             [e.target.name]: e.target.value
         })
+        console.log(this.state.nome)
     }
 
     handleDiaRecebimentoChange = value => {
@@ -291,6 +299,9 @@ class Grupo extends Component {
 
     componentDidMount() {
         this.listarGrupos()
+        const email = getUser()
+        console.log(email)
+        this.setState({usuarioEmail: email})
     }
 
     next() {
@@ -344,12 +355,13 @@ class Grupo extends Component {
         } else return;
     }
 
-    handleParticipanteNomeChange = (value, index) => {
+    handleParticipanteNomeChange = (e) => {
         let dados = this.state.participantes
-        dados[index].nome = value
-        this.setState({ participantes: dados[index].nome })
-        console.log(this.state.participantes)
-    }
+        //console.log(e.target.value)
+        dados[e.target.name] = e.target.value
+        //console.log(dados[e.target.name])   
+        this.setState({ participantes: dados })
+    }   
 
     atualizaStadoDoArray = (array) => {
         this.setState({ participantes: array })
@@ -392,7 +404,7 @@ class Grupo extends Component {
                                     name={`${part}[${index}][nome]`}
                                     placeholder="Digite o nome"
                                     style={{ width: '100%', marginRight: 10 }}
-                                    onChange={(e) => this.handleParticipanteNomeChange(e.target.value, index)}
+                                    onChange={this.handleParticipanteNomeChange}
                                 />
                             )}
                         </FormItem>

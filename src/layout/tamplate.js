@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 
 import { Layout, Menu, Breadcrumb } from 'antd';
 import { Link } from 'react-router-dom'
-import { login, logout, getToken } from '../funcoes/services'
+import { login, logout, getToken, getUser, removeUser } from '../funcoes/services'
 
 class Tamplate extends Component {
     constructor(props) {
@@ -11,7 +11,9 @@ class Tamplate extends Component {
 
     handleLogout() {
         const token = getToken()
+        const user = getUser()
         logout(token)
+        removeUser(user)
     }
 
     render() {

@@ -3,7 +3,7 @@ import React, { Component } from 'react'
 import { notification } from 'antd'
 import '../assets/css/form-login.css'
 import { withRouter } from 'react-router-dom'
-import { login, isAutentication } from '../funcoes/services'
+import { login, isAutentication, setUser } from '../funcoes/services'
 import apiAuth from './../funcoes/apiAuth';
 
 class LoginForm2 extends Component {
@@ -38,13 +38,13 @@ class LoginForm2 extends Component {
         this.setState({ loading: true })
 
         apiAuth.post('login/', { email, password })
-            .then(response => login(response.data.token))
+            .then(response => [login(response.data.token), setUser(response.data.usuarioEmail)])
             .then(response => this.props.history.push('/app'))
             .catch(error => [
                 notification.error({
                     message: 'Ops!',
                     description:
-                        error.response.data.message.toString()
+                        error.toString()//error.response.data.message.toString()
                 }),
             ])
     }

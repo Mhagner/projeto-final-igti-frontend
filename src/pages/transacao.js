@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import Tamplate from '../layout/tamplate'
 import { Button, Select, Row, Col, Form, Descriptions, Tabs, Divider, Spin } from 'antd';
-import { AUTH } from './../funcoes/services';
+import { AUTH, getUser } from './../funcoes/services';
 import api from './../funcoes/api';
 import { formatMoney } from '../funcoes/utils'
 import moment from 'moment'
@@ -22,6 +22,7 @@ class transacao extends Component {
             mesAnoFim: undefined,
             valorMensal: undefined,
             jurosMensal: undefined,
+            usuarioEmail: getUser(),
             loading: false,
             _id: undefined,
             grupos: [],
@@ -30,7 +31,7 @@ class transacao extends Component {
     }
 
     listaGrupos = () => {
-        api.get('/grupos')
+        api.get(`/grupos?usuarioEmail=${this.state.usuarioEmail}`)
             .then(response => this.setState({ grupos: response.data }))
             .catch(error => {
                 console.log(error)
