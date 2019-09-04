@@ -46,7 +46,7 @@ export default (props) => {
                                 style={{ fontSize: '24px' }}
                             />
                             <Icon
-                                type="plus-circle"
+                                type="eye"
                                 style={{ fontSize: '24px' }}
                                 theme="twoTone"
                                 twoToneColor="#52c41a"

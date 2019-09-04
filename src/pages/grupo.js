@@ -91,7 +91,7 @@ class Grupo extends Component {
 
     listarGrupos() {
         this.setState({ tableLoading: true })
-        console.log(this.state.usuarioEmail)
+
         api.get(`/grupos?usuarioEmail=${this.state.usuarioEmail}`)
             .then(response => this.setState({ grupos: response.data }))
             .then(response => this.setState({ tableLoading: false }))
@@ -108,19 +108,17 @@ class Grupo extends Component {
             mesAnoFim: moment(moment(this.state.mesAnoFim).format("L"), "MMDDYYYY").format()
         })
 
-      
-
         const { nome, descricao, diaPagamento, diaRecebimento, mesAnoInicio, mesAnoFim,
-            valorMensal, jurosAcumulativo, jurosMensal, participantes, dados, usuarioEmail } = this.state
-
-        console.log(participantes)
-        console.log(usuarioEmail)
+            valorMensal, jurosAcumulativo, jurosMensal, participantes, usuarioEmail } = this.state
 
         this.setState({ loading: true })
 
+        console.log(this.state.participantes)
+
         api.post(`/grupos`, {
             nome, descricao, diaPagamento, diaRecebimento, mesAnoInicio,
-            mesAnoFim, valorMensal, jurosAcumulativo, jurosMensal, participantes, usuarioEmail })
+            mesAnoFim, valorMensal, jurosAcumulativo, jurosMensal, participantes, usuarioEmail
+        })
             .then(response => [
                 this.setState({ loading: false }),
                 this.limpaCampos(),
@@ -230,9 +228,7 @@ class Grupo extends Component {
             jurosAcumulativo: firtItem.jurosAcumulativo,
             jurosMensal: firtItem.jurosMensal,
             edicao: true,
-            participantes: [
-                { nome: partsNome }
-            ]
+            participantes: [firtItem.participantes]
         })
 
         this.setState({ array: this.state.grupos[0].participantes })
@@ -251,7 +247,7 @@ class Grupo extends Component {
         this.setState({
             [e.target.name]: e.target.value
         })
-        console.log(this.state.nome)
+        //console.log(this.state.nome)
     }
 
     handleDiaRecebimentoChange = value => {
@@ -300,8 +296,7 @@ class Grupo extends Component {
     componentDidMount() {
         this.listarGrupos()
         const email = getUser()
-        console.log(email)
-        this.setState({usuarioEmail: email})
+        this.setState({ usuarioEmail: email })
     }
 
     next() {
@@ -355,20 +350,25 @@ class Grupo extends Component {
         } else return;
     }
 
-    handleParticipanteNomeChange = (e) => {
-        let dados = this.state.participantes
+    handleParticipanteNomeChange = (value, index) => {
+        const { participantes } = this.state
         //console.log(e.target.value)
-        dados[e.target.name] = e.target.value
-        //console.log(dados[e.target.name])   
-        this.setState({ participantes: dados })
-    }   
+        //[e.target.name] = e.target.value
+        let nomes = participantes
+        
+        nomes[index] = {nome: value}
+   
+        this.setState({ participantes:  nomes  })
+        
+        console.log(participantes)
+    }
 
     atualizaStadoDoArray = (array) => {
         this.setState({ participantes: array })
     }
 
     render() {
-        const formItemLayout = {    
+        const formItemLayout = {
             labelCol: { span: 6 },
             wrapperCol: { span: 14 },
         };
@@ -401,10 +401,10 @@ class Grupo extends Component {
                         >
                             {getFieldDecorator(`${item}[${index}].nome`)(
                                 <Input
-                                    name={`${part}[${index}][nome]`}
+                                    name={index}
                                     placeholder="Digite o nome"
                                     style={{ width: '100%', marginRight: 10 }}
-                                    onChange={this.handleParticipanteNomeChange}
+                                    onChange={(e) => this.handleParticipanteNomeChange(e.target.value,index)}
                                 />
                             )}
                         </FormItem>

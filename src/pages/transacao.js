@@ -92,7 +92,7 @@ class transacao extends Component {
 
         var inicio = moment(mesAnoInicio)
         var fim = moment(mesAnoFim)
-        var qtdeMeses = (fim.diff(inicio, 'months') + 1)
+        var qtdeMeses = (fim.diff(inicio, 'months') + 2)
         var valorAPagar = this.calcularValorAPagar(valorMensal, jurosMensal, qtdeMeses)
 
         const renderTabs =
