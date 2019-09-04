@@ -104,7 +104,7 @@ class transacao extends Component {
                     <Descriptions title="" layout="vertical">
                         <DescriptionsItem label="Ordem/participante">
                             {(grupo && participantes) ? participantes.map((p, indice) => (
-                                <p>{indice + 1} - {p.nome}</p>
+                                <p>{indice + 1}º - {p.nome}</p>
                             )) : undefined}
                         </DescriptionsItem>
                         <DescriptionsItem label="Valor a pagar">
@@ -183,7 +183,7 @@ class transacao extends Component {
                         <Row gutter={24}>
                             <Col span={24}>
                                 <div>
-                                    <Tabs type="card" style={{ height: 220 }}>
+                                    <Tabs type="card" >
                                         {renderTabs}
                                     </Tabs>
                                 </div>
