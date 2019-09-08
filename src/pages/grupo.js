@@ -228,7 +228,7 @@ class Grupo extends Component {
             jurosAcumulativo: firtItem.jurosAcumulativo,
             jurosMensal: firtItem.jurosMensal,
             edicao: true,
-            participantes: [firtItem.participantes]
+            participantes: firtItem.participantes
         })
 
         this.setState({ array: this.state.grupos[0].participantes })
@@ -312,8 +312,8 @@ class Grupo extends Component {
     calculaQuantidadeDeMeses = () => {
         var inicio = moment(this.state.mesAnoInicio)
         var fim = moment(this.state.mesAnoFim)
-        var qtdeMeses = (fim.diff(inicio, 'months') + 1)
-        return qtdeMeses + 1
+        var qtdeMeses = (fim.diff(inicio, 'months') + 2)
+        return qtdeMeses
     }
 
     remove = (k) => {
@@ -347,20 +347,19 @@ class Grupo extends Component {
             form.setFieldsValue({
                 keys: nextKeys,
             });
+            
         } else return;
     }
 
     handleParticipanteNomeChange = (value, index) => {
         const { participantes } = this.state
-        //console.log(e.target.value)
-        //[e.target.name] = e.target.value
+
         let nomes = participantes
-        
-        nomes[index] = {nome: value}
-   
-        this.setState({ participantes:  nomes  })
-        
-        console.log(participantes)
+
+        nomes[index] = { nome: value }
+
+        this.setState({ participantes: nomes })
+
     }
 
     atualizaStadoDoArray = (array) => {
@@ -404,7 +403,7 @@ class Grupo extends Component {
                                     name={index}
                                     placeholder="Digite o nome"
                                     style={{ width: '100%', marginRight: 10 }}
-                                    onChange={(e) => this.handleParticipanteNomeChange(e.target.value,index)}
+                                    onChange={(e) => this.handleParticipanteNomeChange(e.target.value, index)}
                                 />
                             )}
                         </FormItem>

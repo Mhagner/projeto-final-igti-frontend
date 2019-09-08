@@ -87,6 +87,9 @@ class LoginForm2 extends Component {
         return (
             <div className="login-wrap">
                 <div className="login-html">
+                    <div className="group-logo">
+                        <h3>Logo</h3>
+                    </div>
                     <input
                         id="tab-1"
                         type="radio"
@@ -133,18 +136,12 @@ class LoginForm2 extends Component {
                                         type="checkbox"
                                         className="check"
                                     />
-                                   
                                 </div>
                                 <div className="group">
-                                    
                                     <input
                                         type="submit"
                                         className="button"
                                         value="Entrar" />
-                                </div>
-                                <div className="hr"></div>
-                                <div className="foot-lnk">
-                                    <a href="#">Esqueceu sua senha?</a>
                                 </div>
                             </div>
                         </form>

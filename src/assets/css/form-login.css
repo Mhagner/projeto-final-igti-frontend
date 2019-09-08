@@ -13,7 +13,7 @@ a{color:inherit;text-decoration:none}
 	width:100%;
 	margin:auto;
 	max-width:430px;
-	min-height:580px;
+	min-height:650px;
 	position:relative;
 	background:url(https://s3.amazonaws.com/upload-imagens-slide/agenda-economica-nacional-1.jpg) no-repeat center;
 	box-shadow:0 12px 15px 0 rgba(0,0,0,.24),0 17px 50px 0 rgba(0,0,0,.19);
@@ -35,6 +35,13 @@ a{color:inherit;text-decoration:none}
 	transform:rotateY(180deg);
 	backface-visibility:hidden;
 	transition:all .4s linear;
+}
+.group-logo{
+	font-size:18px;
+	margin-right:20px;
+	padding-bottom:2px;
+	margin:0 20px 40px 0;
+	border-bottom:2px solid transparent;	
 }
 .login-html .sign-in,
 .login-html .sign-up,

@@ -86,13 +86,14 @@ class transacao extends Component {
         const { participantes, grupo, mesesTab, grupos, descricao, mesAnoFim, mesAnoInicio, valorMensal, jurosMensal } = this.state
 
         const lista = grupos || []
+        
         const renderGrupos = lista.map(grupo => (
             <Option key={grupo._id} value={grupo.nome}>{grupo.nome}</Option>
         ))
 
         var inicio = moment(mesAnoInicio)
         var fim = moment(mesAnoFim)
-        var qtdeMeses = (fim.diff(inicio, 'months') + 2)
+        var qtdeMeses = (fim.diff(inicio, 'months')+2)
         var valorAPagar = this.calcularValorAPagar(valorMensal, jurosMensal, qtdeMeses)
 
         const renderTabs =
