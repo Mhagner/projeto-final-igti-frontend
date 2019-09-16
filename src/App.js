@@ -18,15 +18,17 @@ class App extends Component {
     this.state = {
       quantidade: 0,
       valores: 0,
-      loading: false
+      loading: false,
+      usuarioEmail: getUser()
     }
   }
 
   obtenhaQuantidadeDeGrupos = () => {
     this.setState({ loading: true })
-    var usuarioEmail = getUser()
-    //console.log(usuarioEmail)
-    api.get('/grupos/count', { usuarioEmail })
+
+    //const { usuarioEmail } = this.state
+
+    api.get('/grupos/count')
       .then(response => this.setState({ quantidade: response.data.valor }))
       .then(response => this.setState({ loading: false }))
       .catch(error => {
@@ -69,7 +71,7 @@ class App extends Component {
                       <Title
                         level={3}
                         style={{ color: 'white' }}>
-                        {this.state.quantidade || 0}
+                        {this.state.quantidade}
                       </Title>
                       <p>Grupos gerenciados</p>
                     </Col>
@@ -80,7 +82,7 @@ class App extends Component {
                 <Card style={{ width: 300, color: 'white', background: 'LimeGreen' }}>
                   <Row>
                     <Col span={8}>
-                      <Icon type="arrow-up" style={{ fontSize: '60px' }} />
+                      <Icon type="calculator" style={{ fontSize: '60px' }} />
                     </Col>
                     <Col span={14}>
                       <Title
@@ -88,29 +90,12 @@ class App extends Component {
                         style={{ color: 'white' }}>
                         {formatMoney(this.state.valores, 2, 'R$ ', '.', ',')}
                       </Title>
-                      <p>Total das parcelas</p>
+                      <p>Total em parcelas</p>
                     </Col>
                   </Row>
                 </Card>
               </Col>
-              <Col span={8}>
-                <Card style={{ width: 300, color: 'white', background: 'LimeGreen' }}>
-                  <Row>
-                    <Col span={8}>
-                      <Icon type="arrow-down" style={{ fontSize: '60px' }} />
-                    </Col>
-                    <Col span={14}>
-                      <Title
-                        level={3}
-                        style={{ color: 'white' }}>
-                        R$ 458,00
-                    </Title>
-                      <p>A receber</p>
-                    </Col>
-                  </Row>
-
-                </Card>
-              </Col>
+              
             </Row>
           </Spin>
         </Tamplate>
