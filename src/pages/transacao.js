@@ -93,7 +93,7 @@ class transacao extends Component {
 
         var inicio = moment(mesAnoInicio)
         var fim = moment(mesAnoFim)
-        var qtdeMeses = (fim.diff(inicio, 'months') + 1)
+        var qtdeMeses = (fim.diff(inicio, 'months') + 2)
         var valorAPagar = this.calcularValorAPagar(valorMensal, jurosMensal, qtdeMeses)
 
         const renderTabs =
@@ -128,14 +128,14 @@ class transacao extends Component {
 
         return (
             <Tamplate>
-                <h2>Simulação</h2>
+                <h2>Transações</h2>
                 <Row gutter={24}>
                     <Col span={10}>
                         <Form>
                             <FormItem label="Grupo">
                                 <Select
                                     showSearch
-                                    style={{ width: 200 }}
+                                    style={{ width: 300 }}
                                     placeholder="Selecione o grupo"
                                     optionFilterProp="children"
                                     onChange={this.onChange.bind(this)}

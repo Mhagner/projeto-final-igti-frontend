@@ -300,7 +300,7 @@ class Grupo extends Component {
     calculaQuantidadeDeMeses = () => {
         var inicio = moment(this.state.mesAnoInicio)
         var fim = moment(this.state.mesAnoFim)
-        var qtdeMeses = (fim.diff(inicio, 'months') + 1)
+        var qtdeMeses = (fim.diff(inicio, 'months') + 2)
         return qtdeMeses
     }
 

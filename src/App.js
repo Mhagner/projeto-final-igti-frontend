@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Row, Col, Result, Card, Icon, Typography, Spin } from 'antd';
 import Tamplate from './layout/tamplate'
 import api from './funcoes/api'
+import { formatMoney } from './funcoes/utils'
+import { getUser } from './funcoes/services'
 
 //css do antd
 import 'antd/dist/antd.css'
@@ -15,14 +17,27 @@ class App extends Component {
 
     this.state = {
       quantidade: 0,
+      valores: 0,
       loading: false
     }
   }
 
   obtenhaQuantidadeDeGrupos = () => {
     this.setState({ loading: true })
-    api.get('/grupos/count')
-      .then(response => this.setState({ quantidade: response.data.value }))
+    var usuarioEmail = getUser()
+    //console.log(usuarioEmail)
+    api.get('/grupos/count', { usuarioEmail })
+      .then(response => this.setState({ quantidade: response.data.valor }))
+      .then(response => this.setState({ loading: false }))
+      .catch(error => {
+        console.log(error)
+      })
+  }
+
+  obtenhaASomaTotalDasParcelas = () => {
+    this.setState({ loading: true })
+    api.get('/grupos/valores')
+      .then(response => this.setState({ valores: response.data.valor }))
       .then(response => this.setState({ loading: false }))
       .catch(error => {
         console.log(error)
@@ -31,6 +46,7 @@ class App extends Component {
 
   componentDidMount() {
     this.obtenhaQuantidadeDeGrupos()
+    this.obtenhaASomaTotalDasParcelas()
   }
 
   render() {
@@ -53,7 +69,7 @@ class App extends Component {
                       <Title
                         level={3}
                         style={{ color: 'white' }}>
-                        {this.state.quantidade}
+                        {this.state.quantidade || 0}
                       </Title>
                       <p>Grupos gerenciados</p>
                     </Col>
@@ -70,9 +86,9 @@ class App extends Component {
                       <Title
                         level={3}
                         style={{ color: 'white' }}>
-                        4
-                    </Title>
-                      <p>Participantes</p>
+                        {formatMoney(this.state.valores, 2, 'R$ ', '.', ',')}
+                      </Title>
+                      <p>Total das parcelas</p>
                     </Col>
                   </Row>
                 </Card>
