@@ -1,3 +1,10 @@
+# Projeto final do MBA Desenvolvimento Fullstack
+## Implementação com Node no backend e Reactjs no frontend
+
+!![poupeMais](https://github.com/Mhagner/projeto-final-igti-frontend/blob/master/igti-tcc-final.gif)
+
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
